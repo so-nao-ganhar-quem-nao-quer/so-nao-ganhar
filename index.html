@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Jogo do Tigrinho - Educativo</title>
+  <style>
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(135deg, #1b1b1b, #3a3a3a);
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+
+    .container {
+      background-color: #222;
+      border-radius: 20px;
+      padding: 30px;
+      text-align: center;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
+      width: 90%;
+      max-width: 500px;
+    }
+
+    h1 {
+      font-size: 2rem;
+      margin-bottom: 10px;
+    }
+
+    .slot {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .symbol {
+      width: 80px;
+      height: 80px;
+      background-color: #444;
+      border-radius: 10px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-size: 2rem;
+      border: 2px solid #555;
+    }
+
+    button {
+      background-color: #ff9800;
+      color: white;
+      border: none;
+      padding: 15px 30px;
+      border-radius: 10px;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background-color: #ffa726;
+    }
+
+    .result {
+      margin-top: 20px;
+      font-size: 1.2rem;
+    }
+
+    .educativo {
+      margin-top: 30px;
+      font-size: 0.95rem;
+      color: #ccc;
+      line-height: 1.5;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🎰 Jogo do Tigrinho (Simulador Educativo)</h1>
+
+    <div class="slot" id="slot">
+      <div class="symbol">🐯</div>
+      <div class="symbol">🍌</div>
+      <div class="symbol">💰</div>
+    </div>
+
+    <button onclick="girar()">Girar</button>
+
+    <div class="result" id="resultado"></div>
+
+    <div class="educativo">
+      <p>Este é um simulador educativo do famoso “Jogo do Tigrinho”.</p>
+      <p>⚠️ Jogos de azar envolvem riscos financeiros e podem causar dependência. Use este simulador para entender como funcionam as mecânicas de sorte e probabilidade.</p>
+    </div>
+  </div>
+
+  <script>
+    const simbolos = ['🐯', '🍌', '💰', '🍒', '💎'];
+    const slotDivs = document.querySelectorAll('.symbol');
+    const resultado = document.getElementById('resultado');
+
+    function girar() {
+      const escolhidos = [];
+
+      slotDivs.forEach((div, i) => {
+        const simbolo = simbolos[Math.floor(Math.random() * simbolos.length)];
+        div.textContent = simbolo;
+        escolhidos.push(simbolo);
+      });
+
+      if (escolhidos[0] === escolhidos[1] && escolhidos[1] === escolhidos[2]) {
+        resultado.textContent = "🎉 Parabéns! Você simulou uma vitória!";
+      } else {
+        resultado.textContent = "😅 Não foi dessa vez. Tente novamente!";
+      }
+    }
+  </script>
+</body>
+</html>
