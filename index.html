@@ -1,123 +1,365 @@
 <!DOCTYPE html>
-<html lang="pt-BR">
+<html lang="pt-br">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Jogo do Tigrinho - Educativo</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>Só Não Ganha Quem Não Quer</title>
+  <link href="https://fonts.googleapis.com/css2?family=Russo+One&family=Roboto:wght@400;700&display=swap" rel="stylesheet" />
   <style>
-    body {
+    * {
       margin: 0;
-      font-family: 'Segoe UI', sans-serif;
-      background: linear-gradient(135deg, #1b1b1b, #3a3a3a);
-      color: white;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Roboto', sans-serif;
+      background: radial-gradient(circle at top, #2a003d, #000);
+      color: #fff;
       min-height: 100vh;
+      display: flex;
+      flex-direction: column;
     }
 
-    .container {
-      background-color: #222;
-      border-radius: 20px;
-      padding: 30px;
+    header {
+      background: #1a002b;
+      padding: 20px 40px;
       text-align: center;
-      box-shadow: 0 0 30px rgba(0, 0, 0, 0.7);
-      width: 90%;
-      max-width: 500px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.6);
     }
 
-    h1 {
-      font-size: 2rem;
-      margin-bottom: 10px;
+    header h1 {
+      font-family: 'Russo One', sans-serif;
+      font-size: 2.8rem;
+      color: #ffcc00;
+      letter-spacing: 2px;
     }
 
-    .slot {
+    nav {
       display: flex;
       justify-content: center;
-      gap: 10px;
-      margin: 20px 0;
+      gap: 30px;
+      margin-top: 10px;
+      flex-wrap: wrap;
     }
 
-    .symbol {
-      width: 80px;
-      height: 80px;
-      background-color: #444;
-      border-radius: 10px;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      font-size: 2rem;
-      border: 2px solid #555;
-    }
-
-    button {
-      background-color: #ff9800;
-      color: white;
-      border: none;
-      padding: 15px 30px;
-      border-radius: 10px;
+    nav a {
+      color: #fff;
+      text-decoration: none;
+      font-weight: bold;
       font-size: 1rem;
-      cursor: pointer;
+      padding: 5px 10px;
+      border-radius: 5px;
       transition: background 0.3s;
     }
 
-    button:hover {
-      background-color: #ffa726;
+    nav a:hover {
+      background: #ffcc00;
+      color: #1a002b;
     }
 
-    .result {
-      margin-top: 20px;
+    main {
+      flex: 1;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 50px 20px;
+    }
+
+    .game-container {
+      background: #2a003d;
+      border: 3px solid #ffcc00;
+      border-radius: 20px;
+      padding: 40px;
+      max-width: 900px;
+      width: 100%;
+      text-align: center;
+      box-shadow: 0 0 40px rgba(255, 204, 0, 0.3);
+      position: relative;
+    }
+
+    .game-container h2 {
+      font-size: 2.2rem;
+      margin-bottom: 20px;
+      color: #ffcc00;
+    }
+
+    .slot-wrapper {
+      display: grid;
+      grid-template-columns: repeat(3, 100px);
+      gap: 15px;
+      justify-content: center;
+      margin-bottom: 30px;
+    }
+
+    .reel {
+      background: #1a001f;
+      border: 2px solid #ffaa00;
+      border-radius: 12px;
+      width: 100px;
+      height: 100px;
+      font-size: 2.5rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.3s ease-in-out;
+      user-select: none;
+    }
+
+    .reel.highlight {
+      border-color: #00ff99;
+      box-shadow: 0 0 15px #00ff99;
+      animation: pulse 1s infinite alternate;
+    }
+
+    @keyframes pulse {
+      from {
+        box-shadow: 0 0 15px #00ff99;
+      }
+      to {
+        box-shadow: 0 0 30px #00ff99;
+      }
+    }
+
+    .controls {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 10px;
+    }
+
+    button {
+      padding: 10px 30px;
       font-size: 1.2rem;
+      border: none;
+      border-radius: 8px;
+      background: linear-gradient(45deg, #ffd700, #ffaa00);
+      color: #1a001f;
+      font-weight: bold;
+      cursor: pointer;
+      transition: transform 0.2s, background 0.3s;
+      user-select: none;
     }
 
-    .educativo {
-      margin-top: 30px;
-      font-size: 0.95rem;
-      color: #ccc;
-      line-height: 1.5;
+    button:disabled {
+      background: #555;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    button:hover:not(:disabled) {
+      transform: scale(1.05);
+      background: linear-gradient(45deg, #ffcc00, #ff8800);
+    }
+
+    input[type="number"] {
+      padding: 8px;
+      border-radius: 6px;
+      border: none;
+      font-size: 1rem;
+      width: 120px;
+      text-align: center;
+    }
+
+    #mensagem {
+      font-size: 1.1rem;
+      font-weight: bold;
+      min-height: 30px;
+      padding: 5px;
+      user-select: none;
+    }
+
+    #saldo {
+      font-weight: bold;
+      color: #00ffcc;
+      user-select: none;
+    }
+
+    footer {
+      background: #1a002b;
+      text-align: center;
+      padding: 15px;
+      font-size: 0.9rem;
+      color: #aaa;
+      user-select: none;
+    }
+
+    /* RESPONSIVO PARA CELULARES */
+    @media (max-width: 380px) {
+      .slot-wrapper {
+        grid-template-columns: repeat(3, 60px);
+        gap: 8px;
+      }
+
+      .reel {
+        width: 60px;
+        height: 60px;
+        font-size: 1.8rem;
+      }
+
+      .game-container {
+        padding: 15px;
+      }
+
+      header h1 {
+        font-size: 1.4rem;
+      }
+
+      .game-container h2 {
+        font-size: 1.4rem;
+      }
+
+      button {
+        font-size: 0.9rem;
+        padding: 6px 16px;
+      }
+
+      input[type="number"] {
+        width: 70px;
+        font-size: 0.85rem;
+      }
+
+      #mensagem {
+        font-size: 1rem;
+        text-align: center;
+        padding: 5px 10px;
+      }
     }
   </style>
 </head>
 <body>
-  <div class="container">
-    <h1>🎰 Jogo do Tigrinho (Simulador Educativo)</h1>
+  <header>
+    <h1>Só Não Ganha Quem Não Quer</h1>
+    <nav>
+      <a href="#">Início</a>
+      <a href="#">Jogos</a>
+      <a href="#">Suporte</a>
+    </nav>
+  </header>
 
-    <div class="slot" id="slot">
-      <div class="symbol">🐯</div>
-      <div class="symbol">🍌</div>
-      <div class="symbol">💰</div>
+  <main>
+    <div class="game-container">
+      <h2>Jogo do Tigroso</h2>
+      <div class="slot-wrapper" id="slot">
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+        <div class="reel"></div>
+      </div>
+
+      <div class="controls">
+        <p>Saldo: <span id="saldo">R$ 100.00</span></p>
+        <input type="number" id="aposta" min="1" value="5" />
+        <button id="btnGirar">Girar</button>
+        <p id="mensagem"></p>
+      </div>
     </div>
+  </main>
 
-    <button onclick="girar()">Girar</button>
-
-    <div class="result" id="resultado"></div>
-
-    <div class="educativo">
-      <p>Este é um simulador educativo do famoso “Jogo do Tigrinho”.</p>
-      <p>⚠️ Jogos de azar envolvem riscos financeiros e podem causar dependência. Use este simulador para entender como funcionam as mecânicas de sorte e probabilidade.</p>
-    </div>
-  </div>
+  <footer>
+    &copy; 2025 Só Não Ganha Quem Não Quer. Todos os direitos reservados.
+  </footer>
 
   <script>
-    const simbolos = ['🐯', '🍌', '💰', '🍒', '💎'];
-    const slotDivs = document.querySelectorAll('.symbol');
-    const resultado = document.getElementById('resultado');
+    const reels = document.querySelectorAll('.reel');
+    const btnGirar = document.getElementById('btnGirar');
+    const saldoEl = document.getElementById('saldo');
+    const apostaInput = document.getElementById('aposta');
+    const mensagem = document.getElementById('mensagem');
 
-    function girar() {
-      const escolhidos = [];
+    const simbolos = ['🐯','🐯','🐯','🐱','🐶','🐸','🐷','🦁','🐵']; // mais chances do tigre
+    let saldo = 100.00;
 
-      slotDivs.forEach((div, i) => {
-        const simbolo = simbolos[Math.floor(Math.random() * simbolos.length)];
-        div.textContent = simbolo;
-        escolhidos.push(simbolo);
+    function atualizarSaldo() {
+      saldoEl.textContent = `R$ ${saldo.toFixed(2)}`;
+    }
+
+    function validarAposta() {
+      const aposta = parseFloat(apostaInput.value);
+      if (isNaN(aposta) || aposta <= 0) {
+        mensagem.textContent = 'Digite um valor válido para apostar.';
+        mensagem.style.color = '#ff5555';
+        return null;
+      }
+      if (aposta > saldo) {
+        mensagem.textContent = 'Saldo insuficiente para essa aposta.';
+        mensagem.style.color = '#ff5555';
+        return null;
+      }
+      mensagem.textContent = '';
+      return aposta;
+    }
+
+    function girarSlot() {
+      const aposta = validarAposta();
+      if (aposta === null) return;
+
+      saldo -= aposta;
+      atualizarSaldo();
+      mensagem.textContent = '';
+      btnGirar.disabled = true;
+
+      reels.forEach(r => r.classList.remove('highlight'));
+
+      let animCount = 0;
+      const animInterval = setInterval(() => {
+        reels.forEach(r => {
+          r.textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
+        });
+        animCount++;
+        if (animCount > 15) {
+          clearInterval(animInterval);
+          mostrarResultado(aposta);
+        }
+      }, 80);
+    }
+
+    function mostrarResultado(aposta) {
+      const resultados = Array.from(reels).map(() => simbolos[Math.floor(Math.random() * simbolos.length)]);
+      reels.forEach((r, i) => {
+        r.textContent = resultados[i];
       });
 
-      if (escolhidos[0] === escolhidos[1] && escolhidos[1] === escolhidos[2]) {
-        resultado.textContent = "🎉 Parabéns! Você simulou uma vitória!";
+      const linhas = [
+        [0,1,2], [3,4,5], [6,7,8], // linhas horizontais
+        [0,4,8], [2,4,6]           // diagonais
+      ];
+
+      let ganhou = false;
+      let linhasGanhas = [];
+
+      linhas.forEach(indices => {
+        if(resultados[indices[0]] === resultados[indices[1]] && resultados[indices[1]] === resultados[indices[2]]) {
+          ganhou = true;
+          linhasGanhas.push(indices);
+        }
+      });
+
+      if (ganhou) {
+        linhasGanhas.forEach(indices => {
+          indices.forEach(i => reels[i].classList.add('highlight'));
+        });
+        const premio = aposta * 5 * linhasGanhas.length;
+        saldo += premio;
+        atualizarSaldo();
+        mensagem.textContent = `🎉 Parabéns! Você ganhou R$ ${premio.toFixed(2)} com ${linhasGanhas.length} linha(s)!`;
+        mensagem.style.color = '#7CFC00';
       } else {
-        resultado.textContent = "😅 Não foi dessa vez. Tente novamente!";
+        mensagem.textContent = '💔 Que pena! Tente novamente.';
+        mensagem.style.color = '#ff5555';
       }
+
+      btnGirar.disabled = false;
     }
+
+    atualizarSaldo();
+    btnGirar.addEventListener('click', girarSlot);
+    apostaInput.addEventListener('input', validarAposta);
   </script>
 </body>
 </html>
