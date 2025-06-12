@@ -64,6 +64,7 @@
       justify-content: center;
       align-items: center;
       padding: 50px 20px;
+      position: relative;
     }
 
     .game-container {
@@ -76,6 +77,7 @@
       text-align: center;
       box-shadow: 0 0 40px rgba(255, 204, 0, 0.3);
       position: relative;
+      user-select: none;
     }
 
     .game-container h2 {
@@ -90,6 +92,7 @@
       gap: 15px;
       justify-content: center;
       margin-bottom: 30px;
+      position: relative;
     }
 
     .reel {
@@ -104,6 +107,8 @@
       justify-content: center;
       transition: all 0.3s ease-in-out;
       user-select: none;
+      position: relative;
+      z-index: 1;
     }
 
     .reel.highlight {
@@ -184,6 +189,15 @@
       user-select: none;
     }
 
+    /* Canvas linha de conexão */
+    #lineCanvas {
+      position: absolute;
+      top: 0;
+      left: 0;
+      pointer-events: none;
+      z-index: 10;
+    }
+
     /* RESPONSIVO PARA CELULARES */
     @media (max-width: 380px) {
       .slot-wrapper {
@@ -238,8 +252,8 @@
   </header>
 
   <main>
-    <div class="game-container">
-      <h2>Jogo do Tigroso</h2>
+    <div class="game-container" id="gameContainer">
+      <h2>Jogo do Tigrinho</h2>
       <div class="slot-wrapper" id="slot">
         <div class="reel"></div>
         <div class="reel"></div>
@@ -251,6 +265,7 @@
         <div class="reel"></div>
         <div class="reel"></div>
       </div>
+      <canvas id="lineCanvas"></canvas>
 
       <div class="controls">
         <p>Saldo: <span id="saldo">R$ 100.00</span></p>
@@ -271,9 +286,67 @@
     const saldoEl = document.getElementById('saldo');
     const apostaInput = document.getElementById('aposta');
     const mensagem = document.getElementById('mensagem');
+    const canvas = document.getElementById('lineCanvas');
+    const gameContainer = document.getElementById('gameContainer');
+    const ctx = canvas.getContext('2d');
 
-    const simbolos = ['🐯','🐯','🐯','🐱','🐶','🐸','🐷','🦁','🐵']; // mais chances do tigre
+    const simbolos = ['🐯', '🎰', '🧧', '👑', '💰', '🍊', '🏆'];
+
+    const valoresSimbolo = {
+      '🐯': 10,
+      '🎰': 8,
+      '🧧': 6,
+      '👑': 5,
+      '💰': 4,
+      '🍊': 2,
+      '🏆': 3,
+    };
+
     let saldo = 100.00;
+
+    function ajustarCanvas() {
+      const rect = gameContainer.getBoundingClientRect();
+      canvas.width = rect.width;
+      canvas.height = rect.height;
+      canvas.style.top = '0';
+      canvas.style.left = '0';
+    }
+
+    function desenharLinha(indices) {
+      ctx.strokeStyle = '#00ff99';
+      ctx.lineWidth = 5;
+      ctx.shadowColor = '#00ff99';
+      ctx.shadowBlur = 10;
+      ctx.lineCap = 'round';
+
+      ctx.beginPath();
+
+      indices.forEach((index, i) => {
+        const reel = reels[index];
+        const rect = reel.getBoundingClientRect();
+        const containerRect = gameContainer.getBoundingClientRect();
+
+        const x = rect.left - containerRect.left + rect.width / 2;
+        const y = rect.top - containerRect.top + rect.height / 2;
+
+        if (i === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+
+      ctx.stroke();
+    }
+
+    function limparLinha() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    function iniciarTabuleiro() {
+      reels.forEach((r) => {
+        r.textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
+        r.classList.remove('highlight');
+      });
+      limparLinha();
+    }
 
     function atualizarSaldo() {
       saldoEl.textContent = `R$ ${saldo.toFixed(2)}`;
@@ -295,71 +368,121 @@
       return aposta;
     }
 
-    function girarSlot() {
+    // Geração de símbolos com chance 30% de repetir o anterior para ser um pouco mais difícil
+    function gerarSimbolosComChance() {
+      const resultados = [];
+      for (let i = 0; i < 9; i++) {
+        if (i === 0) {
+          resultados[i] = simbolos[Math.floor(Math.random() * simbolos.length)];
+        } else {
+          const repetirVizinho = Math.random() < 0.3; // 30% chance de repetir o anterior
+          if (repetirVizinho) {
+            resultados[i] = resultados[i - 1];
+          } else {
+            resultados[i] = simbolos[Math.floor(Math.random() * simbolos.length)];
+          }
+        }
+      }
+      return resultados;
+    }
+
+    // Verifica apenas combinações horizontais e diagonais
+    function verificarVitoria(tabuleiro) {
+      const linhas = [
+        [0,1,2],
+        [3,4,5],
+        [6,7,8],
+        [0,4,8],
+        [2,4,6]
+      ];
+
+      let ganhos = [];
+      linhas.forEach(indices => {
+        const simbolo = tabuleiro[indices[0]];
+        if (simbolo && indices.every(i => tabuleiro[i] === simbolo)) {
+          ganhos.push({simbolo, indices});
+        }
+      });
+
+      return ganhos;
+    }
+
+    function destacarVencedores(ganhos) {
+      reels.forEach(r => r.classList.remove('highlight'));
+      limparLinha();
+
+      ganhos.forEach(({indices}) => {
+        indices.forEach(i => reels[i].classList.add('highlight'));
+        desenharLinha(indices);
+      });
+    }
+
+    function girar() {
       const aposta = validarAposta();
-      if (aposta === null) return;
+      if (!aposta) return;
+
+      btnGirar.disabled = true;
+      mensagem.textContent = 'Girando...';
+      mensagem.style.color = '#fff';
 
       saldo -= aposta;
       atualizarSaldo();
-      mensagem.textContent = '';
-      btnGirar.disabled = true;
 
-      reels.forEach(r => r.classList.remove('highlight'));
+      const tabuleiro = gerarSimbolosComChance();
 
-      let animCount = 0;
-      const animInterval = setInterval(() => {
-        reels.forEach(r => {
-          r.textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
-        });
-        animCount++;
-        if (animCount > 15) {
-          clearInterval(animInterval);
-          mostrarResultado(aposta);
+      let contador = 0;
+      const interval = setInterval(() => {
+        for(let i=0; i<9; i++) {
+          reels[i].textContent = simbolos[Math.floor(Math.random() * simbolos.length)];
+          reels[i].classList.remove('highlight');
         }
-      }, 80);
+        limparLinha();
+
+        contador++;
+        if (contador >= 15) {
+          clearInterval(interval);
+
+          for(let i=0; i<9; i++) {
+            reels[i].textContent = tabuleiro[i];
+          }
+
+          const ganhos = verificarVitoria(tabuleiro);
+
+          if (ganhos.length > 0) {
+            let ganhoTotal = 0;
+            ganhos.forEach(({simbolo}) => {
+              ganhoTotal += valoresSimbolo[simbolo] * aposta;
+            });
+
+            saldo += ganhoTotal;
+            atualizarSaldo();
+
+            mensagem.textContent = `Parabéns! Você ganhou R$ ${ganhoTotal.toFixed(2)} em ${ganhos.length} combinação${ganhos.length > 1 ? 'ões' : ''}!`;
+            mensagem.style.color = '#00ff99';
+
+            destacarVencedores(ganhos);
+          } else {
+            mensagem.textContent = 'Que pena, não foi dessa vez. Tente de novo!';
+            mensagem.style.color = '#ff5555';
+            limparLinha();
+            reels.forEach(r => r.classList.remove('highlight'));
+          }
+
+          btnGirar.disabled = false;
+        }
+      }, 100);
     }
 
-    function mostrarResultado(aposta) {
-      const resultados = Array.from(reels).map(() => simbolos[Math.floor(Math.random() * simbolos.length)]);
-      reels.forEach((r, i) => {
-        r.textContent = resultados[i];
-      });
+    window.addEventListener('resize', ajustarCanvas);
 
-      const linhas = [
-        [0,1,2], [3,4,5], [6,7,8], // linhas horizontais
-        [0,4,8], [2,4,6]           // diagonais
-      ];
+    btnGirar.addEventListener('click', girar);
+    apostaInput.addEventListener('keydown', e => {
+      if (e.key === 'Enter') girar();
+    });
 
-      let ganhou = false;
-      let linhasGanhas = [];
-
-      linhas.forEach(indices => {
-        if(resultados[indices[0]] === resultados[indices[1]] && resultados[indices[1]] === resultados[indices[2]]) {
-          ganhou = true;
-          linhasGanhas.push(indices);
-        }
-      });
-
-      if (ganhou) {
-        linhasGanhas.forEach(indices => {
-          indices.forEach(i => reels[i].classList.add('highlight'));
-        });
-        const premio = aposta * 5 * linhasGanhas.length;
-        saldo += premio;
-        atualizarSaldo();
-        mensagem.textContent = `🎉 Parabéns! Você ganhou R$ ${premio.toFixed(2)} com ${linhasGanhas.length} linha(s)!`;
-        mensagem.style.color = '#7CFC00';
-      } else {
-        mensagem.textContent = '💔 Que pena! Tente novamente.';
-        mensagem.style.color = '#ff5555';
-      }
-
-      btnGirar.disabled = false;
-    }
-
+    iniciarTabuleiro();
+    ajustarCanvas();
     atualizarSaldo();
-    btnGirar.addEventListener('click', girarSlot);
-    apostaInput.addEventListener('input', validarAposta);
   </script>
 </body>
 </html>
